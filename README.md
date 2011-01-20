@@ -10,3 +10,5 @@ minified. Another and the output is cached. And it's in node, so it's faster
 than you'll ever need.
 
 
+== use
+node server.js -p=<PORT> --debug=<DEBUG LEVEL = debug/warn> /path/to/your/files
