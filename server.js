@@ -3,12 +3,21 @@ var sys = require('sys')
   , url = require('url')
   , path = require('path')
   , scriptTools = require('scriptTools')
-  , _ =require('underscore')
+  , _ = require('underscore')
 
-var opts = scriptTools.optParse()  
+var opts = scriptTools.optParse(process.argv.slice(2))  
+  , PORT = opts[0]['-p'] || 80
+  , DEBUGLEVEL = opts[0]['--debug']
+
+
+var debug = {
+  'warn' : {log:function(){}, warn: console.log}
+, 'debug' : {log:console.log, warn: console.log} 
+}[DEBUGLEVEL] || {log:function(){}, warn: function(){}}
 
 
 /*
+*  Parse the url path and return a list of paths
 * 
 */
 var parsePath = function(filepath){
@@ -52,19 +61,34 @@ var parsePath = function(filepath){
   }
   
   _subRec(filepath, '')
-  console.log(filepath, "PATHS:", paths.join(" & "))
   return paths
 }
 
 
 http.createServer(function(request, response){
+  var paths;
   
-  var path = url.parse(request.url).pathname
+  // Parse URL
+  try{
+    paths = parsePath(url.parse(request.url).pathname)
+  } catch (e){
+    response.writeHead(500, {'Content-Type': 'text/plain'})
+    response.end("Error:", e) 
+    return;
+  }
   
-  parsePath(path)
+  //[TODO Versioning]
+  
+  // Lookup Files
+  
+  //[TODO Dependencies?]
+  
+  // Concatenate
+  
+  //[TODO MINIFY]
   
   response.writeHead(200, {'Content-Type': 'text/plain'});
   response.end("!")
   
-}).listen(8090)
-
+}).listen(PORT)
+debug.log("Started server, port:", PORT)
