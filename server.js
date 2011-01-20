@@ -9,12 +9,17 @@ var sys = require('sys')
   , uglifyParse = require('uglify-js/parse-js')
   , uglifyProcess = require('uglify-js/process')
 
+
+
+
 var opts = scriptTools.optParse(process.argv.slice(2))  
   , PORT = opts[0]['-p'] || 80
   , DEBUGLEVEL = opts[0]['--debug']
   , DIR = opts[1][0] || __dirname
   , URLPREFIX = opts[0]['--prefix'] || '/'
   , CONFIG = opts[0]['--config'] || './zoiks-config'
+  , MINIFY = opts[0]['--minify']
+
 
 
 var debug = {
@@ -130,9 +135,10 @@ scriptTools.loadConfig(CONFIG, function(config){
   
     // Concatenate
   
-    // Minify
-    out = uglifyProcess.gen_code(uglifyParse.parse(out))
-  
+    if (MINIFY){
+      // Minify
+      out = uglifyProcess.gen_code(uglifyParse.parse(out))
+    }
   
   
   
