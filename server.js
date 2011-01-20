@@ -88,11 +88,13 @@ http.createServer(function(request, response){
   
   // Lookup Files
   var _f
+    , out = ""
+    
   try{
     _.each(paths, function(path){
       _f = DIR + path;
-      console.log(fs.readFileSync(fs.realpathSync(DIR + path), 'utf8'))
-    
+      out += "\n/* " + _f + " */\n"
+      out += fs.readFileSync(fs.realpathSync(DIR + path), 'utf8')
     })
   } catch (e){
     debug.warn("Couldn't find file: ", _f)
@@ -113,7 +115,7 @@ http.createServer(function(request, response){
   //[TODO MINIFY]
   
   response.writeHead(200, {'Content-Type': 'text/plain'});
-  response.end("!")
+  response.end(out)
   
 }).listen(PORT)
 debug.log("Started server, port:", PORT, " serving from:" , DIR)
