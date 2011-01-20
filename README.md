@@ -11,4 +11,20 @@ than you'll ever need.
 
 
 == use
-node server.js -p=<PORT> --debug=<DEBUG LEVEL = debug/warn> /path/to/your/files
+    node server.js -p=<PORT> --debug=<DEBUG LEVEL = debug/warn> /path/to/your/files
+  
+  
+then:
+
+request files, separated with commas in the url:
+
+    http://localhost:8090/foo.js,bar.js  
+
+if you have long path names you can save characters by using brackets:
+
+    http://localhost:8090/foo/bar/[baz.js,bong.js]
+
+and you can nest brackets:
+
+    http://localhost:8090/foo/bar/[baz.js,bong.js,bing/[bang.js,bot.js]]
+  
