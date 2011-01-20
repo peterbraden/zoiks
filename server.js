@@ -11,23 +11,6 @@ var sys = require('sys')
 
 
 
-
-var opts = scriptTools.optParse(process.argv.slice(2))  
-  , PORT = opts[0]['-p'] || 80
-  , DEBUGLEVEL = opts[0]['--debug']
-  , DIR = opts[1][0] || __dirname
-  , URLPREFIX = opts[0]['--prefix'] || '/'
-  , CONFIG = opts[0]['--config'] || './zoiks-config'
-  , MINIFY = opts[0]['--minify']
-
-
-
-var debug = {
-  'warn' : {log:function(){}, warn: console.log}
-, 'debug' : {log:console.log, warn: console.log} 
-}[DEBUGLEVEL] || {log:function(){}, warn: function(){}}
-
-
 /*
 *  Parse the url path and return a list of paths
 * 
@@ -88,9 +71,28 @@ var errorResponse = function(response, code, message, context){
 }
 
 
+var op = scriptTools.optParse(process.argv.slice(2))
+
+scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
 
 
-scriptTools.loadConfig(CONFIG, function(config){
+
+  var opts = _.extend(config, op[0])  
+    , PORT = opts['-p'] || 80
+    , DEBUGLEVEL = opts['--debug']
+    , DIR = op[1][0] || __dirname
+    , URLPREFIX = opts['--prefix'] || '/'
+    , MINIFY = opts['--minify']
+
+  var debug = {
+    'warn' : {log:function(){}, warn: console.log}
+  , 'debug' : {log:console.log, warn: console.log} 
+  }[DEBUGLEVEL] || {log:function(){}, warn: function(){}}
+
+ 
+ 
+ 
+ 
   http.createServer(function(request, response){
     // TODO : Check cache
   
