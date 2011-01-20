@@ -5,6 +5,7 @@ var sys = require('sys')
   , path = require('path')
   , scriptTools = require('scriptTools')
   , _ = require('underscore')
+  , mustache = require('mustache')
 
 var opts = scriptTools.optParse(process.argv.slice(2))  
   , PORT = opts[0]['-p'] || 80
@@ -68,6 +69,18 @@ var parsePath = function(filepath){
 }
 
 
+var error = "<h1>{{ code }}</h1><h2>{{ m }}<h3>{{ c }}"
+var errorResponse = function(response, code, message, context){
+  response.writeHead(code, {'Content-Type': 'text/html'})
+  response.write(mustache.to_html(error, {code:code, m:message, c:context}))
+  for(var i=0; i<514; i++){
+    response.write(" ")
+  } //Chrome blocks 404's - TEMP  
+  response.end()
+}
+
+
+
 http.createServer(function(request, response){
   var paths;
   
@@ -79,8 +92,7 @@ http.createServer(function(request, response){
     
     paths = parsePath(pathname)
   } catch (e){
-    response.writeHead(500, {'Content-Type': 'text/plain'})
-    response.end("Error:", e) 
+    errorResponse(response, 500, "Couldn't parse url", e)
     return;
   }
   
@@ -99,10 +111,7 @@ http.createServer(function(request, response){
   } catch (e){
     debug.warn("Couldn't find file: ", _f)
     debug.log(e)
-    response.writeHead(404, {'Content-Type': 'text/html'})
-    response.write("Couldn't find script:" +  _f)
-    response.write("While serving:" + paths.join(" "))
-    response.end("Error:" + e) 
+    errorResponse(response, 404, "Couldn't find script:" +  _f, e)
     return;
     
   }  
