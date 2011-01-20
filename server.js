@@ -6,6 +6,8 @@ var sys = require('sys')
   , scriptTools = require('scriptTools')
   , _ = require('underscore')
   , mustache = require('mustache')
+  , uglifyParse = require('uglify-js/parse-js')
+  , uglifyProcess = require('uglify-js/process')
 
 var opts = scriptTools.optParse(process.argv.slice(2))  
   , PORT = opts[0]['-p'] || 80
@@ -121,7 +123,11 @@ http.createServer(function(request, response){
   
   // Concatenate
   
-  //[TODO MINIFY]
+  // Minify
+  out = uglifyProcess.gen_code(uglifyParse.parse(out))
+  
+  
+  
   
   response.writeHead(200, {'Content-Type': 'text/plain'});
   response.end(out)
