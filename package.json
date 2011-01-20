@@ -8,7 +8,7 @@
     "type" : "git",
     "url" : "https://github.com/yammer/zoiks"
   },
-  "dependencies" : ["uglify-js", "scriptTools", "mustache"],
+  "dependencies" : ["uglify-js", "scriptTools", "mustache", "underscore"],
   "author": "Peter Braden <peterbraden@peterbraden.co.uk> (peterbraden.co.uk)",
   "directories": {
     "lib": ""
