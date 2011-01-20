@@ -84,6 +84,10 @@ var errorResponse = function(response, code, message, context){
 
 
 http.createServer(function(request, response){
+  // TODO : Check cache
+  
+  
+  
   var paths;
   
   // Parse URL
