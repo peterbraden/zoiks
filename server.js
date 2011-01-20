@@ -14,6 +14,7 @@ var opts = scriptTools.optParse(process.argv.slice(2))
   , DEBUGLEVEL = opts[0]['--debug']
   , DIR = opts[1][0] || __dirname
   , URLPREFIX = opts[0]['--prefix'] || '/'
+  , CONFIG = opts[0]['--config'] || './zoiks-config'
 
 
 var debug = {
@@ -83,58 +84,62 @@ var errorResponse = function(response, code, message, context){
 
 
 
-http.createServer(function(request, response){
-  // TODO : Check cache
+
+scriptTools.loadConfig(CONFIG, function(config){
+  http.createServer(function(request, response){
+    // TODO : Check cache
   
   
   
-  var paths;
+    var paths;
   
-  // Parse URL
-  try{
-    var pathname = url.parse(request.url).pathname
-    if (pathname.indexOf(URLPREFIX) === 0)
-      pathname = pathname.substring(URLPREFIX.length)
+    // Parse URL
+    try{
+      var pathname = url.parse(request.url).pathname
+      if (pathname.indexOf(URLPREFIX) === 0)
+        pathname = pathname.substring(URLPREFIX.length)
     
-    paths = parsePath(pathname)
-  } catch (e){
-    errorResponse(response, 500, "Couldn't parse url", e)
-    return;
-  }
+      paths = parsePath(pathname)
+    } catch (e){
+      errorResponse(response, 500, "Couldn't parse url", e)
+      return;
+    }
   
-  //[TODO Versioning]
+    //[TODO Versioning]
   
-  // Lookup Files
-  var _f
-    , out = ""
+    // Lookup Files
+    var _f
+      , out = ""
     
-  try{
-    _.each(paths, function(path){
-      _f = DIR + path;
-      out += "\n/* " + _f + " */\n"
-      out += fs.readFileSync(fs.realpathSync(DIR + path), 'utf8')
-    })
-  } catch (e){
-    debug.warn("Couldn't find file: ", _f)
-    debug.log(e)
-    errorResponse(response, 404, "Couldn't find script:" +  _f, e)
-    return;
+    try{
+      _.each(paths, function(path){
+        _f = DIR + path;
+        out += "\n/* " + _f + " */\n"
+        out += fs.readFileSync(fs.realpathSync(DIR + path), 'utf8')
+      })
+    } catch (e){
+      debug.warn("Couldn't find file: ", _f)
+      debug.log(e)
+      errorResponse(response, 404, "Couldn't find script:" +  _f, e)
+      return;
     
-  }  
+    }  
   
   
-  //[TODO Dependencies?]
+    //[TODO Dependencies?]
   
-  // Concatenate
+    // Concatenate
   
-  // Minify
-  out = uglifyProcess.gen_code(uglifyParse.parse(out))
-  
-  
+    // Minify
+    out = uglifyProcess.gen_code(uglifyParse.parse(out))
   
   
-  response.writeHead(200, {'Content-Type': 'text/plain'});
-  response.end(out)
   
-}).listen(PORT)
-debug.log("Started server, port:", PORT, " serving from:" , DIR)
+  
+    response.writeHead(200, {'Content-Type': 'text/plain'});
+    response.end(out)
+  
+  }).listen(PORT)
+  debug.log("Started server, port:", PORT, " serving from:" , DIR)
+
+})
