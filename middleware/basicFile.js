@@ -17,12 +17,11 @@ exports.Ware = function(opts){
           out += fs.readFileSync(fs.realpathSync(_f), 'utf8')
         })
 
-        cb(out);
+        cb(false, out);
       } catch (e){
         opts.debug.warn("Couldn't find file: ", _f)
-        opts.debug.log(e)
         //errorResponse(response, 404, "Couldn't find script:" +  _f, e)
-        cb('!!!');
+        cb({message: "Couldn't find file: " +  _f}, "");
 
       }       
     }

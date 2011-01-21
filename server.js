@@ -10,6 +10,8 @@ var sys = require('sys')
   , uglifyProcess = require('uglify-js/process')
 
 
+var CACHE = {} //Let's keep it in memory :)
+
 
 /*
 *  Parse the url path and return a list of paths
@@ -125,6 +127,13 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
     if (pathname.indexOf(URLPREFIX) === 0)
       pathname = pathname.substring(URLPREFIX.length)
     
+    if (CACHE[pathname]){
+      response.writeHead(CACHE[pathname].head)
+      response.end(CACHE[pathname].body)
+      logAccess(request, CACHE[pathname].head[0], "cached") 
+      return;
+    }
+    
     
     
     // TODO : Check cache
@@ -146,13 +155,21 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
     }
   
   
-    var respond = function (out){
+    var respond = function (err, out){
+        if (err){
+          response.writeHead(500, {'Content-Type': 'text/plain'});
+          response.end(err.message)
+          return;
+        }
+      
         if (MINIFY){
           // Minify
           out = uglifyProcess.gen_code(uglifyParse.parse(out))
         }
         
-        response.writeHead(200, {'Content-Type': contentType});
+        var head = [200, {'Content-Type': contentType}]
+        CACHE[pathname] = {head : head, body: out}
+        response.writeHead(head[0], head[1]);
         response.end(out)
         logAccess(request, 200, "uncached") 
     }
