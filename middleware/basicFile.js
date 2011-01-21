@@ -16,10 +16,9 @@ exports.Ware = function(opts){
           out += "\n/* " + _f + " */\n"
           out += fs.readFileSync(fs.realpathSync(_f), 'utf8')
         })
-        console.log("!!", out)
+
         cb(out);
       } catch (e){
-        console.log(e.message)
         opts.debug.warn("Couldn't find file: ", _f)
         opts.debug.log(e)
         //errorResponse(response, 404, "Couldn't find script:" +  _f, e)

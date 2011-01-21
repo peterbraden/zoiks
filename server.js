@@ -71,6 +71,15 @@ var errorResponse = function(response, code, message, context){
 }
 
 
+
+var revString = function(x){
+  return x.split("").reverse().join("")
+}
+
+
+
+
+
 var op = scriptTools.optParse(process.argv.slice(2))
 
 scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
@@ -87,9 +96,20 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
     , mws = []
 
   var debug = {
-    'warn' : {log:function(){}, warn: console.log}
-  , 'debug' : {log:console.log, warn: console.log} 
-  }[DEBUGLEVEL] || {log:function(){}, warn: function(){}}
+    'warn' : {log:function(){}, warn: console.log, access : console.log}
+  , 'debug' : {log:console.log, warn: console.log, access : console.log} 
+  , 'access' : {log:function(){}, warn: function(){}, access : console.log}
+  }[DEBUGLEVEL] || {log:function(){}, warn: function(){}, access : function(){}}
+
+  var logAccess = function(request, code, data){
+    debug.access(url.parse(request.url).pathname + " " + code + " " + data)
+  }
+  
+  contentTypes = {
+    '.js' : 'application/x-javascript'
+  , '.css' : 'text/css'
+  }
+
 
   _.each(MIDDLEWARE || {'./middleware/basicFile':{}}, function(mw, name, l){
     mws.push(require(name).Ware(mw)) //HACKY - doesn't follow ecmascript - relys on ordered object props
@@ -98,36 +118,43 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
  
  
   http.createServer(function(request, response){
+    var pathname = url.parse(request.url).pathname
+      , paths
+      , contentType = 'text/plain'
+      
+    if (pathname.indexOf(URLPREFIX) === 0)
+      pathname = pathname.substring(URLPREFIX.length)
+    
+    
+    
     // TODO : Check cache
-  
-  
-  
-    var paths;
-  
+      //debug.access(pathname)
+
     // Parse URL
     try{
-      var pathname = url.parse(request.url).pathname
-      if (pathname.indexOf(URLPREFIX) === 0)
-        pathname = pathname.substring(URLPREFIX.length)
-    
       paths = parsePath(pathname)
     } catch (e){
       errorResponse(response, 500, "Couldn't parse url", e)
       return;
     }
   
-    //[TODO Versioning]
+    for (var i in contentTypes){
+      if (paths[0] && revString(paths[0]).indexOf(revString(i)) === 0){
+        contentType = contentTypes[i]
+        break;
+      }
+    }
   
   
     var respond = function (out){
-        console.log("respond")
         if (MINIFY){
           // Minify
           out = uglifyProcess.gen_code(uglifyParse.parse(out))
         }
         
-        response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.end(out) 
+        response.writeHead(200, {'Content-Type': contentType});
+        response.end(out)
+        logAccess(request, 200, "uncached") 
     }
   
     mws[0].process(paths, respond, {'DIR' : DIR, 'debug' : debug})
