@@ -180,4 +180,4 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
   }).listen(PORT)
   debug.log("Started server, port:", PORT, " serving from:" , DIR)
 
-})
+}, false)
