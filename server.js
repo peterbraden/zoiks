@@ -83,13 +83,17 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
     , DIR = op[1][0] || __dirname
     , URLPREFIX = opts['--prefix'] || '/'
     , MINIFY = opts['--minify']
+    , MIDDLEWARE = opts['middleware']
+    , mws = []
 
   var debug = {
     'warn' : {log:function(){}, warn: console.log}
   , 'debug' : {log:console.log, warn: console.log} 
   }[DEBUGLEVEL] || {log:function(){}, warn: function(){}}
 
- 
+  _.each(MIDDLEWARE || {'./middleware/basicFile':{}}, function(mw, name, l){
+    mws.push(require(name).Ware(mw)) //HACKY - doesn't follow ecmascript - relys on ordered object props
+  })
  
  
  
@@ -114,38 +118,20 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
   
     //[TODO Versioning]
   
-    // Lookup Files
-    var _f
-      , out = ""
-    
-    try{
-      _.each(paths, function(path){
-        _f = DIR + path;
-        out += "\n/* " + _f + " */\n"
-        out += fs.readFileSync(fs.realpathSync(DIR + path), 'utf8')
-      })
-    } catch (e){
-      debug.warn("Couldn't find file: ", _f)
-      debug.log(e)
-      errorResponse(response, 404, "Couldn't find script:" +  _f, e)
-      return;
-    
-    }  
   
-  
-    //[TODO Dependencies?]
-  
-    // Concatenate
-  
-    if (MINIFY){
-      // Minify
-      out = uglifyProcess.gen_code(uglifyParse.parse(out))
+    var respond = function (out){
+        console.log("respond")
+        if (MINIFY){
+          // Minify
+          out = uglifyProcess.gen_code(uglifyParse.parse(out))
+        }
+        
+        response.writeHead(200, {'Content-Type': 'text/plain'});
+        response.end(out) 
     }
   
+    mws[0].process(paths, respond, {'DIR' : DIR, 'debug' : debug})
   
-  
-    response.writeHead(200, {'Content-Type': 'text/plain'});
-    response.end(out)
   
   }).listen(PORT)
   debug.log("Started server, port:", PORT, " serving from:" , DIR)
