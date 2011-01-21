@@ -27,4 +27,7 @@ if you have long path names you can save characters by using brackets:
 and you can nest brackets:
 
     http://localhost:8090/foo/bar/[baz.js,bong.js,bing/[bang.js,bot.js]]
-  
+
+## Middleware  
+
+You can run arbitrary scripts on your files - so you can retrieve dependancies in js, use sass for your css...
