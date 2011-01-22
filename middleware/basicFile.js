@@ -4,7 +4,7 @@ var _ = require('underscore')
 /* Basic file lookup */
 exports.Ware = function(opts){
   return {
-    process : function(paths, cb, opts){
+    process : function(paths, res, cb, opts){
         
       // Lookup Files
       var _f
@@ -17,7 +17,7 @@ exports.Ware = function(opts){
           out += fs.readFileSync(fs.realpathSync(_f), 'utf8')
         })
 
-        cb(false, out);
+        cb(false, res + out);
       } catch (e){
         opts.debug.warn("Couldn't find file: ", _f)
         //errorResponse(response, 404, "Couldn't find script:" +  _f, e)

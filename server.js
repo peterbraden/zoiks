@@ -134,10 +134,7 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
       return;
     }
     
-    
-    
-    // TODO : Check cache
-      //debug.access(pathname)
+  
 
     // Parse URL
     try{
@@ -173,8 +170,18 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
         response.end(out)
         logAccess(request, 200, "uncached") 
     }
+
+    var onion = function(i){
+      if (i<mws.length){
+        return function(err, res){
+          mws[i].process(paths, res, onion(i+1), {'DIR' : DIR, 'debug' : debug})
+        }  
+      }
+      return respond
+    }
+    onion(0)(undefined, "")
   
-    mws[0].process(paths, respond, {'DIR' : DIR, 'debug' : debug})
+    //mws[0].process(paths, respond, {'DIR' : DIR, 'debug' : debug})
   
   
   }).listen(PORT)
