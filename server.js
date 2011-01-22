@@ -6,8 +6,7 @@ var sys = require('sys')
   , scriptTools = require('scriptTools')
   , _ = require('underscore')
   , mustache = require('mustache')
-  , uglifyParse = require('uglify-js/parse-js')
-  , uglifyProcess = require('uglify-js/process')
+
 
 
 var CACHE = {} //Let's keep it in memory :)
@@ -93,7 +92,6 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
     , DEBUGLEVEL = opts['--debug']
     , DIR = op[1][0] || __dirname
     , URLPREFIX = opts['--prefix'] || '/'
-    , MINIFY = opts['--minify']
     , MIDDLEWARE = opts['middleware']
     , mws = []
 
@@ -159,11 +157,6 @@ scriptTools.loadConfig(op[0]['--config'] || './zoiks-config', function(config){
           return;
         }
       
-        if (MINIFY){
-          // Minify
-          out = uglifyProcess.gen_code(uglifyParse.parse(out))
-        }
-        
         var head = [200, {'Content-Type': contentType}]
         CACHE[pathname] = {head : head, body: out}
         response.writeHead(head[0], head[1]);

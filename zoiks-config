@@ -1,5 +1,8 @@
 {
-  "middleware" : {"./middleware/basicFile" : {}}
+  "middleware" : {
+      "./middleware/basicFile" : {}
+    , "./middleware/jsMin" : {}
+  }
 
 
 }
